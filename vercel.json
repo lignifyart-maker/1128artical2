@@ -1,6 +1,7 @@
 {
-  "buildCommand": null,
-  "devCommand": null,
-  "installCommand": null,
-  "outputDirectory": "."
+  "functions": {
+    "api/gemini.js": {
+      "maxDuration": 300
+    }
+  }
 }
