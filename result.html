@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文章結果 - AI 文章合併器</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f7f9fb;
+        }
+    </style>
+</head>
+
+<body class="p-4 md:p-8">
+    <div class="container mx-auto max-w-4xl">
+        <header class="text-center mb-8 bg-white p-6 rounded-xl shadow-lg">
+            <h1 class="text-3xl font-bold text-gray-800">📚 合併結果</h1>
+        </header>
+
+        <!-- 操作按钮 -->
+        <div class="flex justify-center gap-4 mb-8 flex-wrap">
+            <button onclick="goHome()"
+                class="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition duration-300 flex items-center gap-2">
+                🏠 回到首頁
+            </button>
+            <button onclick="copyArticle()"
+                class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition duration-300 flex items-center gap-2">
+                📋 複製文章
+            </button>
+            <button onclick="downloadHTML()"
+                class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition duration-300 flex items-center gap-2">
+                💾 下載 HTML
+            </button>
+        </div>
+
+        <!-- 文章内容 -->
+        <div id="articleContent" class="bg-white p-8 rounded-xl shadow-xl border border-gray-200 min-h-[400px]">
+            <div class="prose max-w-none text-gray-800 whitespace-pre-wrap" id="articleText">
+                載入中...
+            </div>
+        </div>
+
+        <!-- Toast 提示 -->
+        <div id="toast"
+            class="fixed bottom-5 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg hidden transition-opacity">
+            <span id="toastMessage"></span>
+        </div>
+    </div>
+
+    <script>
+        // 从 URL 参数或 sessionStorage 获取文章内容
+        function loadArticle() {
+            const article = sessionStorage.getItem('mergedArticle');
+            if (article) {
+                document.getElementById('articleText').textContent = article;
+            } else {
+                document.getElementById('articleText').innerHTML = '<p class="text-red-500">未找到文章內容，請返回首頁重新生成。</p>';
+            }
+        }
+
+        // 回到首页
+        function goHome() {
+            window.location.href = 'index.html';
+        }
+
+        // 复制文章
+        function copyArticle() {
+            const text = document.getElementById('articleText').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('文章已複製到剪貼簿！');
+            }).catch(() => {
+                // 备用方法
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showToast('文章已複製到剪貼簿！');
+            });
+        }
+
+        // 下载为 HTML
+        function downloadHTML() {
+            const article = document.getElementById('articleText').textContent;
+            const htmlContent = `<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>合併文章</title>
+    <style>
+        body {
+            font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            line-height: 1.8;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .content {
+            white-space: pre-wrap;
+            text-align: justify;
+        }
+    </style>
+</head>
+<body>
+    <h1>AI 合併文章</h1>
+    <div class="content">${article}</div>
+</body>
+</html>`;
+
+            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `合併文章_${new Date().getTime()}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('HTML 文件已下載！');
+        }
+
+        // 显示提示
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            toastMessage.textContent = message;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        // 页面加载时执行
+        loadArticle();
+    </script>
+</body>
+
+</html>
