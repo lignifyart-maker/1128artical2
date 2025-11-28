@@ -9,7 +9,7 @@ const CONFIG = {
     // Application Settings
     STORAGE_KEY: 'articleCreator_articles',
     MAX_TITLE_LENGTH: 5,
-    MAX_OUTPUT_TOKENS: 8192,
+    MAX_OUTPUT_TOKENS: 65536,  // 支援約 20000 字的輸出
 
     // Feature Flags
     USE_AI_CREATION: true,
