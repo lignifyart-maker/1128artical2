@@ -1,8 +1,7 @@
-// Vercel Serverless Function to proxy Gemini API requests with streaming support
-// This keeps the API key secure on the server side and enables real-time content delivery
+// Vercel Serverless Function - 簡單版本（非 streaming）
+// 一次性返回完整結果
 
 export default async function handler(req, res) {
-    // Only allow POST requests
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
@@ -17,19 +16,14 @@ export default async function handler(req, res) {
         const { prompt, systemInstruction } = req.body;
 
         const MODEL_NAME = "gemini-3-pro-preview";
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:streamGenerateContent`;
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent`;
 
         const payload = {
             contents: [{ parts: [{ text: prompt }] }],
             systemInstruction: systemInstruction ? { parts: [{ text: systemInstruction }] } : undefined
         };
 
-        // Set headers for Server-Sent Events (SSE)
-        res.setHeader('Content-Type', 'text/event-stream');
-        res.setHeader('Cache-Control', 'no-cache');
-        res.setHeader('Connection', 'keep-alive');
-
-        const response = await fetch(`${API_URL}?key=${API_KEY}&alt=sse`, {
+        const response = await fetch(`${API_URL}?key=${API_KEY}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -37,33 +31,20 @@ export default async function handler(req, res) {
 
         if (!response.ok) {
             const errorData = await response.json();
-            res.write(`data: ${JSON.stringify({ error: `API Error: ${response.status}`, details: errorData })}\n\n`);
-            res.end();
-            return;
+            return res.status(response.status).json({
+                error: `API Error: ${response.status}`,
+                details: errorData
+            });
         }
 
-        // Stream the response from Gemini API to the client
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-
-        while (true) {
-            const { done, value } = await reader.read();
-
-            if (done) {
-                res.write('data: [DONE]\n\n');
-                res.end();
-                break;
-            }
-
-            const chunk = decoder.decode(value, { stream: true });
-
-            // Forward each chunk to the client
-            res.write(`data: ${chunk}\n\n`);
-        }
+        const data = await response.json();
+        return res.status(200).json(data);
 
     } catch (error) {
         console.error('Gemini API Error:', error);
-        res.write(`data: ${JSON.stringify({ error: 'Internal server error', message: error.message })}\n\n`);
-        res.end();
+        return res.status(500).json({
+            error: 'Internal server error',
+            message: error.message
+        });
     }
 }
