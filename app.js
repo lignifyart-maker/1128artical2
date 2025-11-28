@@ -8,6 +8,13 @@ const createBtn = document.getElementById('createBtn');
 const loadingIndicator = document.getElementById('loadingIndicator');
 const articlesList = document.getElementById('articlesList');
 
+// Settings Elements
+const settingsBtn = document.getElementById('settingsBtn');
+const settingsModal = document.getElementById('settingsModal');
+const closeModalBtn = document.getElementById('closeModalBtn');
+const saveKeyBtn = document.getElementById('saveKeyBtn');
+const apiKeyInput = document.getElementById('apiKeyInput');
+
 // Initialize app
 function init() {
     renderArticlesList();
@@ -18,14 +25,69 @@ function init() {
 // Setup event listeners
 function setupEventListeners() {
     createBtn.addEventListener('click', handleCreate);
+
+    // Settings Modal Listeners
+    settingsBtn.addEventListener('click', openSettings);
+    closeModalBtn.addEventListener('click', closeSettings);
+    saveKeyBtn.addEventListener('click', saveApiKey);
+    settingsModal.addEventListener('click', (e) => {
+        if (e.target === settingsModal) closeSettings();
+    });
 }
 
 // Check if API key is configured
+// Check if API key is configured
 function checkAPIKey() {
-    if (CONFIG.USE_AI_CREATION && !CONFIG.GEMINI_API_KEY) {
+    // Check config (from local file) or localStorage
+    const hasKey = CONFIG.GEMINI_API_KEY || localStorage.getItem('gemini_api_key');
+
+    if (CONFIG.USE_AI_CREATION && !hasKey) {
         console.warn('⚠️ Gemini API key not configured. Using simple mode.');
-        console.info('To enable AI-powered creation, add your API key in config.js');
-        console.info('Get your API key from: https://aistudio.google.com/app/apikey');
+        // Auto open settings if no key found
+        setTimeout(() => {
+            if (!localStorage.getItem('gemini_api_key_skipped')) {
+                openSettings();
+            }
+        }, 1000);
+    }
+}
+
+// Settings Functions
+function openSettings() {
+    const currentKey = localStorage.getItem('gemini_api_key') || '';
+    apiKeyInput.value = currentKey;
+    settingsModal.classList.remove('hidden');
+    // Force reflow
+    void settingsModal.offsetWidth;
+    settingsModal.classList.add('show');
+}
+
+function closeSettings() {
+    settingsModal.classList.remove('show');
+    setTimeout(() => {
+        settingsModal.classList.add('hidden');
+    }, 300);
+    // Mark as skipped so we don't annoy user if they close without saving
+    if (!localStorage.getItem('gemini_api_key')) {
+        localStorage.setItem('gemini_api_key_skipped', 'true');
+    }
+}
+
+function saveApiKey() {
+    const key = apiKeyInput.value.trim();
+    if (key) {
+        localStorage.setItem('gemini_api_key', key);
+        // Update global config
+        CONFIG.GEMINI_API_KEY = key;
+        utils.showToast('API Key 已儲存！');
+        closeSettings();
+        // Remove skipped flag
+        localStorage.removeItem('gemini_api_key_skipped');
+    } else {
+        localStorage.removeItem('gemini_api_key');
+        CONFIG.GEMINI_API_KEY = '';
+        utils.showToast('API Key 已移除');
+        closeSettings();
     }
 }
 

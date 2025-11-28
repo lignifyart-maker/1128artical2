@@ -10,25 +10,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap"
-        rel="stylesheet">
-    <script src="s2t.js"></script>
-</head>
-
-<body>
-    <div class="container">
-        <header class="header">
-            <h1 class="title">
-                <span class="icon">✨</span>
-                AI 文章創作器
-                <span class="icon">✨</span>
-            </h1>
-            <p class="subtitle">提供參考素材，AI 為您創作全新文章</p>
-        </header>
-
-        <main class="main-content">
-            <div class="merge-section">
-                <div class="input-grid">
-                    <div class="input-card">
                         <label for="material1" class="input-label">
                             <span class="label-number">📄</span>
                             <span class="label-text">參考素材一</span>
@@ -77,6 +58,29 @@
                 </div>
             </div>
         </main>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>⚙️ 設定</h3>
+                <button id="closeModalBtn" class="close-button">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="apiKeyInput">Gemini API Key</label>
+                    <input type="password" id="apiKeyInput" class="input-text" placeholder="貼上您的 API Key">
+                    <p class="help-text">
+                        您的 Key 只會儲存在瀏覽器中，不會上傳到伺服器。<br>
+                        <a href="https://aistudio.google.com/app/apikey" target="_blank">取得 API Key</a>
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="saveKeyBtn" class="primary-button">儲存</button>
+            </div>
+        </div>
     </div>
 
     <script src="config.local.js"></script>
