@@ -107,6 +107,18 @@ GEMINI_MODEL: 'gemini-3-pro-preview',  // 改成其他模型名稱
 - 需要網路連線才能使用 AI 功能
 - AI 會創作約 10000 字的文章（會在參考素材基礎上大量補充內容）
 
+### 技術架構細節
+
+- **AI 模型**：Google Gemini 3 Pro Preview
+- **API 端點**：`https://generativelanguage.googleapis.com/v1beta/models/`
+- **最大輸出 Token**：65536 tokens（約支援 10000 字輸出）
+- **生成參數**：
+  - Temperature: 0.8（提高創造性）
+  - Top K: 40
+  - Top P: 0.95
+- **簡繁轉換**：使用內建的 s2t.js 進行簡體轉繁體
+- **標點處理**：自動轉換為全形標點符號（，。！？；：「」『』（））
+
 ## 瀏覽器支援
 
 - ✅ Chrome / Edge
