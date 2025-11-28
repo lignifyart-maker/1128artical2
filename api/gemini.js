@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     try {
         const { prompt, systemInstruction } = req.body;
 
-        const MODEL_NAME = "gemini-2.0-flash-exp";
+        const MODEL_NAME = "gemini-3-pro-preview";
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:streamGenerateContent`;
 
         const payload = {
