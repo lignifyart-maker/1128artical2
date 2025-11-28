@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文章詳情</title>
+    <meta name="description" content="查看 AI 創作的文章內容">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+    <script src="s2t.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header article-header">
+            <h1 id="articleTitle" class="title">文章標題</h1>
+            <div class="article-actions">
+                <button id="backBtn" class="action-button back-button">
+                    <span class="button-icon">←</span>
+                    <span class="button-text">返回首頁</span>
+                </button>
+                <button id="copyBtn" class="action-button copy-button">
+                    <span class="button-icon">📋</span>
+                    <span class="button-text">複製全文</span>
+                </button>
+                <button id="downloadBtn" class="action-button download-button">
+                    <span class="button-icon">⬇</span>
+                    <span class="button-text">下載文章</span>
+                </button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <article class="article-content-card">
+                <div id="articleContent" class="article-content">
+                    <!-- Article content will be dynamically inserted here -->
+                </div>
+            </article>
+        </main>
+    </div>
+
+    <div id="toast" class="toast hidden">
+        <span id="toastMessage"></span>
+    </div>
+
+    <script src="config.local.js"></script>
+    <script src="config.js"></script>
+    <script src="article.js"></script>
+</body>
+
+</html>
