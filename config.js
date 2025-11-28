@@ -7,9 +7,12 @@ const CONFIG = {
     GEMINI_API_URL: 'https://generativelanguage.googleapis.com/v1beta/models/',
 
     // Application Settings
-    STORAGE_KEY: 'articleCreator_articles',
+    STORAGE_KEY: 'articleMerger_articles',
+    MIN_EDGE_MODIFY: 50,      // 每篇文章首尾最少修改字數
+    MAX_EDGE_MODIFY: 500,     // 每篇文章首尾最多修改字數
+    TARGET_OUTPUT_WORDS: 10000,
+    TITLE_MAX_LENGTH: 20,
     MAX_TITLE_LENGTH: 5,
-    MAX_OUTPUT_TOKENS: 65536,  // 支援約 20000 字的輸出
 
     // Feature Flags
     USE_AI_CREATION: true,
@@ -32,9 +35,15 @@ const utils = {
     },
 
     generateTitle(content) {
-        const cleanContent = content.replace(/\s+/g, '').substring(0, 5);
+        // Simple fallback - AI will generate better title
+        const cleanContent = content.replace(/\s+/g, '').substring(0, CONFIG.TITLE_MAX_LENGTH);
         const timestamp = this.formatDate(new Date());
         return `${cleanContent} ${timestamp}`;
+    },
+
+    async generateAiTitle(content) {
+        // This will be called from app.js to generate AI title
+        return content.substring(0, CONFIG.TITLE_MAX_LENGTH) + '...';
     },
 
     toTraditionalChinese(text) {

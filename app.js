@@ -1,121 +1,104 @@
-// Main Application Logic for AI Article Creator
+// Main Application Logic for AI Article Merger
 
 // DOM Elements
-const material1Input = document.getElementById('material1');
-const material2Input = document.getElementById('material2');
-const material3Input = document.getElementById('material3');
-const createBtn = document.getElementById('createBtn');
+const article1Input = document.getElementById('article1');
+const article2Input = document.getElementById('article2');
+const article3Input = document.getElementById('article3');
+const mergeBtn = document.getElementById('mergeBtn');
 const loadingIndicator = document.getElementById('loadingIndicator');
 const articlesList = document.getElementById('articlesList');
 
-// Settings Elements
-const settingsBtn = document.getElementById('settingsBtn');
-const settingsModal = document.getElementById('settingsModal');
-const closeModalBtn = document.getElementById('closeModalBtn');
-const saveKeyBtn = document.getElementById('saveKeyBtn');
-const apiKeyInput = document.getElementById('apiKeyInput');
+// Counter Elements
+const counter1 = document.getElementById('counter1');
+const counter2 = document.getElementById('counter2');
+const counter3 = document.getElementById('counter3');
 
 // Initialize app
 function init() {
     renderArticlesList();
     setupEventListeners();
-    checkAPIKey();
+
+    // Initialize draggable cards
+    if (window.initDraggableCards) {
+        window.initDraggableCards();
+    }
 }
 
 // Setup event listeners
 function setupEventListeners() {
-    createBtn.addEventListener('click', handleCreate);
+    // Input listeners for character counting
+    article1Input.addEventListener('input', () => updateCharCounter(1));
+    article2Input.addEventListener('input', () => updateCharCounter(2));
+    article3Input.addEventListener('input', () => updateCharCounter(3));
 
-    // Settings Modal Listeners
-    settingsBtn.addEventListener('click', openSettings);
-    closeModalBtn.addEventListener('click', closeSettings);
-    saveKeyBtn.addEventListener('click', saveApiKey);
-    settingsModal.addEventListener('click', (e) => {
-        if (e.target === settingsModal) closeSettings();
+    // Clear buttons
+    document.querySelectorAll('.clear-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const field = e.target.dataset.field || e.target.closest('.clear-btn').dataset.field;
+            clearField(parseInt(field));
+        });
     });
+
+    // Merge button
+    mergeBtn.addEventListener('click', handleMerge);
 }
 
-// Check if API key is configured
-// Check if API key is configured
-function checkAPIKey() {
-    // Check config (from local file) or localStorage
-    const hasKey = CONFIG.GEMINI_API_KEY || localStorage.getItem('gemini_api_key');
+// Update character counter
+function updateCharCounter(fieldNum) {
+    const input = document.getElementById(`article${fieldNum}`);
+    const counter = document.getElementById(`counter${fieldNum}`);
+    const length = input.value.length;
 
-    if (CONFIG.USE_AI_CREATION && !hasKey) {
-        console.warn('⚠️ Gemini API key not configured. Using simple mode.');
-        // Auto open settings if no key found
-        setTimeout(() => {
-            if (!localStorage.getItem('gemini_api_key_skipped')) {
-                openSettings();
-            }
-        }, 1000);
+    counter.textContent = `${length} 字`;
+}
+
+// Clear field
+function clearField(fieldNum) {
+    const input = document.getElementById(`article${fieldNum}`);
+    if (input) {
+        input.value = '';
+        updateCharCounter(fieldNum);
     }
 }
 
-// Settings Functions
-function openSettings() {
-    const currentKey = localStorage.getItem('gemini_api_key') || '';
-    apiKeyInput.value = currentKey;
-    settingsModal.classList.remove('hidden');
-    // Force reflow
-    void settingsModal.offsetWidth;
-    settingsModal.classList.add('show');
-}
+// Validate inputs before merging
+function validateInputs() {
+    const article1 = article1Input.value.trim();
+    const article2 = article2Input.value.trim();
+    const article3 = article3Input.value.trim();
 
-function closeSettings() {
-    settingsModal.classList.remove('show');
-    setTimeout(() => {
-        settingsModal.classList.add('hidden');
-    }, 300);
-    // Mark as skipped so we don't annoy user if they close without saving
-    if (!localStorage.getItem('gemini_api_key')) {
-        localStorage.setItem('gemini_api_key_skipped', 'true');
+    // Count non-empty articles
+    const nonEmptyCount = [article1, article2, article3].filter(a => a).length;
+
+    if (nonEmptyCount < 2) {
+        throw new Error('請至少填寫兩篇文章');
     }
+
+    return { article1, article2, article3 };
 }
 
-function saveApiKey() {
-    const key = apiKeyInput.value.trim();
-    if (key) {
-        localStorage.setItem('gemini_api_key', key);
-        // Update global config
-        CONFIG.GEMINI_API_KEY = key;
-        utils.showToast('API Key 已儲存！');
-        closeSettings();
-        // Remove skipped flag
-        localStorage.removeItem('gemini_api_key_skipped');
-    } else {
-        localStorage.removeItem('gemini_api_key');
-        CONFIG.GEMINI_API_KEY = '';
-        utils.showToast('API Key 已移除');
-        closeSettings();
-    }
-}
-
-// Handle create button click
-async function handleCreate() {
-    const material1 = material1Input.value;
-    const material2 = material2Input.value;
-    const material3 = material3Input.value;
-
+// Handle merge button click
+async function handleMerge() {
     try {
-        // Validate input
-        creator.validateMaterials(material1, material2, material3);
+        // Validate inputs
+        const { article1, article2, article3 } = validateInputs();
 
         // Show loading
         showLoading(true);
-        createBtn.disabled = true;
+        mergeBtn.disabled = true;
 
-        // Create article
-        const createdContent = await creator.createArticle(material1, material2, material3);
+        // Merge articles using AI
+        const mergedResult = await creator.mergeArticles(article1, article2, article3);
 
-        // Generate title
-        const title = utils.generateTitle(createdContent);
+        // Generate AI title (pass entire result, function will handle it)
+        const title = await creator.generateTitle(mergedResult);
 
         // Create article object
         const article = {
             id: utils.generateId(),
             title: title,
-            content: createdContent,
+            originalInputs: [article1, article2, article3].filter(a => a),
+            mergedContent: mergedResult,
             createdAt: new Date().toISOString()
         };
 
@@ -123,7 +106,7 @@ async function handleCreate() {
         storage.saveArticle(article);
 
         // Clear inputs
-        clearInputs();
+        clearAllInputs();
 
         // Refresh articles list
         renderArticlesList();
@@ -137,11 +120,11 @@ async function handleCreate() {
         }, 1000);
 
     } catch (error) {
-        console.error('Create error:', error);
-        alert(error.message || '創作文章時發生錯誤，請稍後再試');
+        console.error('Merge error:', error);
+        alert(error.message || '合併文章時發生錯誤，請稍後再試');
     } finally {
         showLoading(false);
-        createBtn.disabled = false;
+        mergeBtn.disabled = false;
     }
 }
 
@@ -154,18 +137,18 @@ function showLoading(show) {
     }
 }
 
-// Clear input fields
-function clearInputs() {
-    material1Input.value = '';
-    material2Input.value = '';
-    material3Input.value = '';
+// Clear all input fields
+function clearAllInputs() {
+    clearField(1);
+    clearField(2);
+    clearField(3);
 }
 
 // Show success message
 function showSuccessMessage() {
     const message = document.createElement('div');
     message.className = 'success-message';
-    message.textContent = '✅ 文章創作成功！';
+    message.textContent = '✅ 文章合併成功！';
     message.style.cssText = `
         position: fixed;
         top: 50%;
@@ -200,7 +183,8 @@ function renderArticlesList() {
         articlesList.innerHTML = `
             <div class="empty-state">
                 <div class="empty-state-icon">📝</div>
-                <p class="empty-state-text">尚無已創作的文章</p>
+                <p class="empty-state-text">尚無已合併的文章</p>
+                <p class="empty-state-hint">開始輸入文章片段並點擊「合併文章」</p>
             </div>
         `;
         return;
@@ -215,7 +199,11 @@ function renderArticlesList() {
                 </button>
             </div>
             <p class="article-card-date">${utils.formatDate(article.createdAt)}</p>
-            <p class="article-card-preview">${escapeHtml(getPreview(article.content))}</p>
+            <p class="article-card-preview">${escapeHtml(getPreview(article.mergedContent.plainText))}</p>
+            <div class="article-card-meta">
+                <span class="meta-item">📊 ${article.mergedContent.plainText.length} 字</span>
+                <span class="meta-item">📑 ${article.originalInputs.length} 篇合併</span>
+            </div>
         </div>
     `).join('');
 
@@ -289,7 +277,7 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// Initialize app when DOM is ready
+// Initialize when DOM is ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
 } else {

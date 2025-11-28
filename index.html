@@ -3,76 +3,232 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 文章合併器</title>
+    <meta name="description" content="使用 AI 智能合併多篇文章，創作出邏輯連貫的長文">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+    <script src="s2t.js"></script>
+</head>
 
-    <div class="input-card">
-        <label for="material2" class="input-label">
-            <span class="label-number">📄</span>
-            <span class="label-text">參考素材二</span>
-        </label>
-        <textarea id="material2" class="input-textarea" placeholder="貼上第二段參考素材..." rows="10"></textarea>
-    </div>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="title">
+                <span class="title-icon">📝</span>
+                AI 文章合併器
+            </h1>
+            <p class="subtitle">智能合併多篇文章，創作連貫長文</p>
+        </header>
 
-    <div class="input-card">
-        <label for="material3" class="input-label">
-            <span class="label-number">📄</span>
-            <span class="label-text">參考素材三（選填）</span>
-        </label>
-        <textarea id="material3" class="input-textarea" placeholder="貼上第三段參考素材（可選）..." rows="10"></textarea>
-    </div>
-    </div>
+        <main class="main-content">
+            <div class="input-section">
+                <h2 class="section-title">
+                    <span class="icon">✍️</span>
+                    輸入文章片段
+                    <span class="hint">（AI 會在段落間擴寫內容）</span>
+                </h2>
 
-    <div class="merge-button-container">
-        <button id="createBtn" class="merge-button">
-            <span class="button-icon">🎨</span>
-            <span class="button-text">AI 創作文章</span>
-        </button>
-    </div>
+                <div class="input-grid">
+                    <!-- Article Input 1 -->
+                    <div class="input-card">
+                        <div class="input-header">
+                            <label for="article1" class="input-label">
+                                <span class="label-number">1</span>
+                                <span class="label-text">第一篇文章</span>
+                            </label>
+                            <div class="input-controls">
+                                <span id="counter1" class="char-counter">0 字</span>
+                                <button class="control-btn clear-btn" data-field="1" title="清除">🗑️</button>
+                            </div>
+                        </div>
+                        <textarea id="article1" class="input-textarea" placeholder="貼上或輸入第一篇文章內容..."
+                            rows="8"></textarea>
+                    </div>
 
-    <div id="loadingIndicator" class="loading-indicator hidden">
-        <div class="spinner"></div>
-        <p class="loading-text">AI 正在創作中...</p>
-    </div>
-    </div>
+                    <!-- Article Input 2 -->
+                    <div class="input-card">
+                        <div class="input-header">
+                            <label for="article2" class="input-label">
+                                <span class="label-number">2</span>
+                                <span class="label-text">第二篇文章</span>
+                            </label>
+                            <div class="input-controls">
+                                <span id="counter2" class="char-counter">0 字</span>
+                                <button class="control-btn clear-btn" data-field="2" title="清除">🗑️</button>
+                            </div>
+                        </div>
+                        <textarea id="article2" class="input-textarea" placeholder="貼上或輸入第二篇文章內容..."
+                            rows="8"></textarea>
+                    </div>
 
-    <div class="articles-section">
-        <h2 class="section-title">
-            <span class="icon">📚</span>
-            已創作的文章
-        </h2>
-        <div id="articlesList" class="articles-list">
-            <!-- Articles will be dynamically inserted here -->
-        </div>
-    </div>
-    </main>
-    </div>
-
-    <!-- Settings Modal -->
-    <div id="settingsModal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>⚙️ 設定</h3>
-                <button id="closeModalBtn" class="close-button">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="apiKeyInput">Gemini API Key</label>
-                    <input type="password" id="apiKeyInput" class="input-text" placeholder="貼上您的 API Key">
-                    <p class="help-text">
-                        您的 Key 只會儲存在瀏覽器中，不會上傳到伺服器。<br>
-                        <a href="https://aistudio.google.com/app/apikey" target="_blank">取得 API Key</a>
-                    </p>
+                    <!-- Article Input 3 (Optional) -->
+                    <div class="input-card">
+                        <div class="input-header">
+                            <label for="article3" class="input-label">
+                                <span class="label-number">3</span>
+                                <span class="label-text">第三篇文章</span>
+                                <span class="optional-tag">選填</span>
+                            </label>
+                            <div class="input-controls">
+                                <span id="counter3" class="char-counter">0 字</span>
+                                <button class="control-btn clear-btn" data-field="3" title="清除">🗑️</button>
+                            </div>
+                        </div>
+                        <textarea id="article3" class="input-textarea" placeholder="貼上或輸入第三篇文章內容...（選填）"
+                            rows="8"></textarea>
+                    </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button id="saveKeyBtn" class="primary-button">儲存</button>
+
+            <div class="merge-button-container">
+                <button id="mergeBtn" class="merge-button">
+                    <span class="button-icon">🎨</span>
+                    <span class="button-text">AI 合併文章</span>
+                </button>
             </div>
-        </div>
+
+            <div id="loadingIndicator" class="loading-indicator hidden">
+                <div class="spinner"></div>
+                <p class="loading-text">AI 正在合併文章中...</p>
+                <p class="loading-subtext">這可能需要一些時間，請稍候</p>
+            </div>
+
+            <div class="articles-section">
+                <h2 class="section-title">
+                    <span class="icon">📚</span>
+                    已合併的文章
+                </h2>
+                <div id="articlesList" class="articles-list">
+                    <!-- Articles will be dynamically inserted here -->
+                </div>
+            </div>
+        </main>
+    </div>
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 文章合併器</title>
+    <meta name="description" content="使用 AI 智能合併多篇文章，創作出邏輯連貫的長文">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+    <script src="s2t.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="title">
+                <span class="title-icon">📝</span>
+                AI 文章合併器
+            </h1>
+            <p class="subtitle">智能合併多篇文章，創作連貫長文</p>
+        </header>
+
+        <main class="main-content">
+            <div class="input-section">
+                <h2 class="section-title">
+                    <span class="icon">✍️</span>
+                    輸入文章片段
+                    <span class="hint">（AI 會在段落間擴寫內容）</span>
+                </h2>
+
+                <div class="input-grid">
+                    <!-- Article Input 1 -->
+                    <div class="input-card">
+                        <div class="input-header">
+                            <label for="article1" class="input-label">
+                                <span class="label-number">1</span>
+                                <span class="label-text">第一篇文章</span>
+                            </label>
+                            <div class="input-controls">
+                                <span id="counter1" class="char-counter">0 字</span>
+                                <button class="control-btn clear-btn" data-field="1" title="清除">🗑️</button>
+                            </div>
+                        </div>
+                        <textarea id="article1" class="input-textarea" placeholder="貼上或輸入第一篇文章內容..."
+                            rows="8"></textarea>
+                    </div>
+
+                    <!-- Article Input 2 -->
+                    <div class="input-card">
+                        <div class="input-header">
+                            <label for="article2" class="input-label">
+                                <span class="label-number">2</span>
+                                <span class="label-text">第二篇文章</span>
+                            </label>
+                            <div class="input-controls">
+                                <span id="counter2" class="char-counter">0 字</span>
+                                <button class="control-btn clear-btn" data-field="2" title="清除">🗑️</button>
+                            </div>
+                        </div>
+                        <textarea id="article2" class="input-textarea" placeholder="貼上或輸入第二篇文章內容..."
+                            rows="8"></textarea>
+                    </div>
+
+                    <!-- Article Input 3 (Optional) -->
+                    <div class="input-card">
+                        <div class="input-header">
+                            <label for="article3" class="input-label">
+                                <span class="label-number">3</span>
+                                <span class="label-text">第三篇文章</span>
+                                <span class="optional-tag">選填</span>
+                            </label>
+                            <div class="input-controls">
+                                <span id="counter3" class="char-counter">0 字</span>
+                                <button class="control-btn clear-btn" data-field="3" title="清除">🗑️</button>
+                            </div>
+                        </div>
+                        <textarea id="article3" class="input-textarea" placeholder="貼上或輸入第三篇文章內容...（選填）"
+                            rows="8"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="merge-button-container">
+                <button id="mergeBtn" class="merge-button">
+                    <span class="button-icon">🎨</span>
+                    <span class="button-text">AI 合併文章</span>
+                </button>
+            </div>
+
+            <div id="loadingIndicator" class="loading-indicator hidden">
+                <div class="spinner"></div>
+                <p class="loading-text">AI 正在合併文章中...</p>
+                <p class="loading-subtext">這可能需要一些時間，請稍候</p>
+            </div>
+
+            <div class="articles-section">
+                <h2 class="section-title">
+                    <span class="icon">📚</span>
+                    已合併的文章
+                </h2>
+                <div id="articlesList" class="articles-list">
+                    <!-- Articles will be dynamically inserted here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden">
+        <span id="toastMessage"></span>
     </div>
 
     <script src="config.local.js"></script>
     <script src="config.js"></script>
     <script src="creator.js"></script>
+    <script src="draggable.js"></script>
     <script src="app.js"></script>
-    </body>
+</body>
 
 </html>
