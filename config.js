@@ -3,7 +3,7 @@ const CONFIG = {
     // Gemini API Configuration
     // API Key is loaded from config.local.js (not committed to git)
     GEMINI_API_KEY: (typeof LOCAL_CONFIG !== 'undefined' && LOCAL_CONFIG.GEMINI_API_KEY) || '',
-    GEMINI_MODEL: 'gemini-3-pro-preview',
+    GEMINI_MODEL: 'gemini-3-pro',
     GEMINI_API_URL: 'https://generativelanguage.googleapis.com/v1beta/models/',
 
     // Application Settings

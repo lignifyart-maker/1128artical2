@@ -36,7 +36,7 @@
 ## 技術架構
 
 - **前端**：HTML, CSS, JavaScript (Vanilla)
-- **AI 模型**：Google Gemini 3 Pro Preview
+- **AI 模型**：Google Gemini 3 Pro
 - **儲存**：localStorage（瀏覽器本地儲存）
 
 ## 檔案說明
@@ -70,7 +70,7 @@ const LOCAL_CONFIG = {
 如需使用不同的 Gemini 模型，請修改 `config.js` 中的：
 
 ```javascript
-GEMINI_MODEL: 'gemini-3-pro-preview',  // 改成其他模型名稱
+GEMINI_MODEL: 'gemini-3-pro',  // 改成其他模型名稱
 ```
 
 ### 安全性說明
@@ -109,7 +109,7 @@ GEMINI_MODEL: 'gemini-3-pro-preview',  // 改成其他模型名稱
 
 ### 技術架構細節
 
-- **AI 模型**：Google Gemini 3 Pro Preview
+- **AI 模型**：Google Gemini 3 Pro
 - **API 端點**：`https://generativelanguage.googleapis.com/v1beta/models/`
 - **最大輸出 Token**：65536 tokens（約支援 10000 字輸出）
 - **生成參數**：
