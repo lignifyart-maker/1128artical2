@@ -6,214 +6,188 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI 文章合併器</title>
     <meta name="description" content="使用 AI 智能合併多篇文章，創作出邏輯連貫的長文">
-    <link rel="stylesheet" href="styles.css">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter font is used by default, but Noto Sans TC is crucial for Traditional Chinese -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap"
         rel="stylesheet">
-    <script src="s2t.js"></script>
+    
+    <style>
+        /* Custom styles to enforce Noto Sans TC and smooth transitions */
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f7f9fb; /* Light background */
+        }
+        
+        .title-icon {
+            transform: rotate(-5deg);
+            display: inline-block;
+        }
+
+        /* Loading Spinner Animation */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #10b981; /* Emerald green */
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        /* Toast Notification Styling */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+        }
+
+        .toast.visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
 </head>
 
-<body>
-    <div class="container">
-        <header class="header">
-            <h1 class="title">
-                <span class="title-icon">📝</span>
+<body class="p-4 md:p-8">
+    <div class="container mx-auto max-w-7xl">
+        
+        <!-- Header Section -->
+        <header class="header text-center mb-10 bg-white p-6 rounded-xl shadow-lg">
+            <h1 class="text-4xl font-bold text-gray-800 flex justify-center items-center">
+                <span class="title-icon mr-3 text-4xl">📝</span>
                 AI 文章合併器
             </h1>
-            <p class="subtitle">智能合併多篇文章，創作連貫長文</p>
+            <p class="text-xl text-gray-500 mt-2">智能合併多篇文章，創作連貫長文</p>
         </header>
 
         <main class="main-content">
-            <div class="input-section">
-                <h2 class="section-title">
-                    <span class="icon">✍️</span>
+            
+            <!-- Input Section -->
+            <div class="input-section mb-12">
+                <h2 class="section-title text-2xl font-semibold text-gray-700 mb-6 flex items-center">
+                    <span class="icon mr-2 text-3xl">✍️</span>
                     輸入文章片段
-                    <span class="hint">（AI 會在段落間擴寫內容）</span>
+                    <span class="hint ml-4 text-base font-normal text-indigo-500 bg-indigo-50 p-1 px-3 rounded-full shadow-inner">
+                        （AI 會在段落間擴寫內容，請提供足夠資訊讓 AI 創作）
+                    </span>
                 </h2>
 
-                <div class="input-grid">
+                <div class="input-grid grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
                     <!-- Article Input 1 -->
-                    <div class="input-card">
-                        <div class="input-header">
-                            <label for="article1" class="input-label">
-                                <span class="label-number">1</span>
-                                <span class="label-text">第一篇文章</span>
+                    <div class="input-card bg-white p-5 rounded-xl shadow-md border-t-4 border-green-500">
+                        <div class="input-header flex justify-between items-center mb-3">
+                            <label for="article1" class="input-label flex items-center text-lg font-medium text-gray-700">
+                                <span class="label-number bg-green-500 text-white w-7 h-7 flex items-center justify-center rounded-full mr-2 font-bold">1</span>
+                                <span class="label-text">第一篇文章 (必填)</span>
                             </label>
-                            <div class="input-controls">
-                                <span id="counter1" class="char-counter">0 字</span>
-                                <button class="control-btn clear-btn" data-field="1" title="清除">🗑️</button>
+                            <div class="input-controls flex items-center space-x-2">
+                                <span id="counter1" class="char-counter text-sm text-gray-500">0 字</span>
+                                <button class="control-btn clear-btn text-gray-400 hover:text-red-500 transition duration-150" data-field="1" title="清除">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.728-1.447A1 1 0 0011 2H9zM7 6h6v10H7V6z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
                             </div>
                         </div>
-                        <textarea id="article1" class="input-textarea" placeholder="貼上或輸入第一篇文章內容..."
-                            rows="8"></textarea>
+                        <textarea id="article1" class="input-textarea w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 resize-y transition duration-150" placeholder="貼上或輸入文章的開頭內容..." rows="10"></textarea>
                     </div>
 
                     <!-- Article Input 2 -->
-                    <div class="input-card">
-                        <div class="input-header">
-                            <label for="article2" class="input-label">
-                                <span class="label-number">2</span>
-                                <span class="label-text">第二篇文章</span>
+                    <div class="input-card bg-white p-5 rounded-xl shadow-md border-t-4 border-green-500">
+                        <div class="input-header flex justify-between items-center mb-3">
+                            <label for="article2" class="input-label flex items-center text-lg font-medium text-gray-700">
+                                <span class="label-number bg-green-500 text-white w-7 h-7 flex items-center justify-center rounded-full mr-2 font-bold">2</span>
+                                <span class="label-text">第二篇文章 (必填)</span>
                             </label>
-                            <div class="input-controls">
-                                <span id="counter2" class="char-counter">0 字</span>
-                                <button class="control-btn clear-btn" data-field="2" title="清除">🗑️</button>
+                            <div class="input-controls flex items-center space-x-2">
+                                <span id="counter2" class="char-counter text-sm text-gray-500">0 字</span>
+                                <button class="control-btn clear-btn text-gray-400 hover:text-red-500 transition duration-150" data-field="2" title="清除">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.728-1.447A1 1 0 0011 2H9zM7 6h6v10H7V6z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
                             </div>
                         </div>
-                        <textarea id="article2" class="input-textarea" placeholder="貼上或輸入第二篇文章內容..."
-                            rows="8"></textarea>
+                        <textarea id="article2" class="input-textarea w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 resize-y transition duration-150" placeholder="貼上或輸入文章的中間內容..." rows="10"></textarea>
                     </div>
 
                     <!-- Article Input 3 (Optional) -->
-                    <div class="input-card">
-                        <div class="input-header">
-                            <label for="article3" class="input-label">
-                                <span class="label-number">3</span>
+                    <div class="input-card bg-white p-5 rounded-xl shadow-md border-t-4 border-yellow-500">
+                        <div class="input-header flex justify-between items-center mb-3">
+                            <label for="article3" class="input-label flex items-center text-lg font-medium text-gray-700">
+                                <span class="label-number bg-yellow-500 text-white w-7 h-7 flex items-center justify-center rounded-full mr-2 font-bold">3</span>
                                 <span class="label-text">第三篇文章</span>
-                                <span class="optional-tag">選填</span>
+                                <span class="optional-tag ml-2 text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full font-semibold">選填</span>
                             </label>
-                            <div class="input-controls">
-                                <span id="counter3" class="char-counter">0 字</span>
-                                <button class="control-btn clear-btn" data-field="3" title="清除">🗑️</button>
+                            <div class="input-controls flex items-center space-x-2">
+                                <span id="counter3" class="char-counter text-sm text-gray-500">0 字</span>
+                                <button class="control-btn clear-btn text-gray-400 hover:text-red-500 transition duration-150" data-field="3" title="清除">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.728-1.447A1 1 0 0011 2H9zM7 6h6v10H7V6z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
                             </div>
                         </div>
-                        <textarea id="article3" class="input-textarea" placeholder="貼上或輸入第三篇文章內容...（選填）"
-                            rows="8"></textarea>
+                        <textarea id="article3" class="input-textarea w-full p-3 border border-gray-300 rounded-lg focus:ring-yellow-500 focus:border-yellow-500 resize-y transition duration-150" placeholder="貼上或輸入文章的結尾內容...（選填）" rows="10"></textarea>
                     </div>
                 </div>
             </div>
 
-            <div class="merge-button-container">
-                <button id="mergeBtn" class="merge-button">
-                    <span class="button-icon">🎨</span>
+            <!-- Merge Button -->
+            <div class="merge-button-container text-center mb-12">
+                <button id="mergeBtn" class="merge-button inline-flex items-center justify-center px-10 py-4 border border-transparent text-lg font-medium rounded-full shadow-2xl text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition duration-300 transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none" disabled>
+                    <span class="button-icon mr-3 text-2xl">🎨</span>
                     <span class="button-text">AI 合併文章</span>
                 </button>
             </div>
 
-            <div id="loadingIndicator" class="loading-indicator hidden">
-                <div class="spinner"></div>
-                <p class="loading-text">AI 正在合併文章中...</p>
-                <p class="loading-subtext">這可能需要一些時間，請稍候</p>
+            <!-- Loading Indicator -->
+            <div id="loadingIndicator" class="loading-indicator hidden text-center mb-12 p-6 bg-white rounded-xl shadow-inner">
+                <div class="spinner mx-auto mb-3"></div>
+                <p class="loading-text text-xl font-medium text-gray-700">AI 正在合併文章中...</p>
+                <p class="loading-subtext text-gray-500">請稍候片刻，AI 正在創作連貫的過渡內容</p>
             </div>
 
+            <!-- Result Section -->
             <div class="articles-section">
-                <h2 class="section-title">
-                    <span class="icon">📚</span>
-                    已合併的文章
+                <h2 class="section-title text-2xl font-semibold text-gray-700 mb-6 flex items-center">
+                    <span class="icon mr-2 text-3xl">📚</span>
+                    合併結果
                 </h2>
-                <div id="articlesList" class="articles-list">
-                    <!-- Articles will be dynamically inserted here -->
+                <div id="articlesList" class="articles-list min-h-[200px] bg-white p-6 rounded-xl shadow-xl border border-gray-200">
+                    <p id="initialMessage" class="text-gray-500 italic text-center p-10">
+                        合併後的文章將會顯示在這裡。請在上方輸入框中輸入文章片段並點擊「AI 合併文章」。
+                    </p>
+                    <!-- Merged content will be dynamically inserted here -->
                 </div>
-            </div>
-        </main>
-    </div>
-<!DOCTYPE html>
-<html lang="zh-TW">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 文章合併器</title>
-    <meta name="description" content="使用 AI 智能合併多篇文章，創作出邏輯連貫的長文">
-    <link rel="stylesheet" href="styles.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap"
-        rel="stylesheet">
-    <script src="s2t.js"></script>
-</head>
-
-<body>
-    <div class="container">
-        <header class="header">
-            <h1 class="title">
-                <span class="title-icon">📝</span>
-                AI 文章合併器
-            </h1>
-            <p class="subtitle">智能合併多篇文章，創作連貫長文</p>
-        </header>
-
-        <main class="main-content">
-            <div class="input-section">
-                <h2 class="section-title">
-                    <span class="icon">✍️</span>
-                    輸入文章片段
-                    <span class="hint">（AI 會在段落間擴寫內容）</span>
-                </h2>
-
-                <div class="input-grid">
-                    <!-- Article Input 1 -->
-                    <div class="input-card">
-                        <div class="input-header">
-                            <label for="article1" class="input-label">
-                                <span class="label-number">1</span>
-                                <span class="label-text">第一篇文章</span>
-                            </label>
-                            <div class="input-controls">
-                                <span id="counter1" class="char-counter">0 字</span>
-                                <button class="control-btn clear-btn" data-field="1" title="清除">🗑️</button>
-                            </div>
-                        </div>
-                        <textarea id="article1" class="input-textarea" placeholder="貼上或輸入第一篇文章內容..."
-                            rows="8"></textarea>
-                    </div>
-
-                    <!-- Article Input 2 -->
-                    <div class="input-card">
-                        <div class="input-header">
-                            <label for="article2" class="input-label">
-                                <span class="label-number">2</span>
-                                <span class="label-text">第二篇文章</span>
-                            </label>
-                            <div class="input-controls">
-                                <span id="counter2" class="char-counter">0 字</span>
-                                <button class="control-btn clear-btn" data-field="2" title="清除">🗑️</button>
-                            </div>
-                        </div>
-                        <textarea id="article2" class="input-textarea" placeholder="貼上或輸入第二篇文章內容..."
-                            rows="8"></textarea>
-                    </div>
-
-                    <!-- Article Input 3 (Optional) -->
-                    <div class="input-card">
-                        <div class="input-header">
-                            <label for="article3" class="input-label">
-                                <span class="label-number">3</span>
-                                <span class="label-text">第三篇文章</span>
-                                <span class="optional-tag">選填</span>
-                            </label>
-                            <div class="input-controls">
-                                <span id="counter3" class="char-counter">0 字</span>
-                                <button class="control-btn clear-btn" data-field="3" title="清除">🗑️</button>
-                            </div>
-                        </div>
-                        <textarea id="article3" class="input-textarea" placeholder="貼上或輸入第三篇文章內容...（選填）"
-                            rows="8"></textarea>
-                    </div>
-                </div>
-            </div>
-
-            <div class="merge-button-container">
-                <button id="mergeBtn" class="merge-button">
-                    <span class="button-icon">🎨</span>
-                    <span class="button-text">AI 合併文章</span>
-                </button>
-            </div>
-
-            <div id="loadingIndicator" class="loading-indicator hidden">
-                <div class="spinner"></div>
-                <p class="loading-text">AI 正在合併文章中...</p>
-                <p class="loading-subtext">這可能需要一些時間，請稍候</p>
-            </div>
-
-            <div class="articles-section">
-                <h2 class="section-title">
-                    <span class="icon">📚</span>
-                    已合併的文章
-                </h2>
-                <div id="articlesList" class="articles-list">
-                    <!-- Articles will be dynamically inserted here -->
+                
+                <!-- Copy Button (Visible only when content exists) -->
+                <div class="text-right mt-4">
+                    <button id="copyBtn" class="hidden inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5h2a2 2 0 012 2v10a2 2 0 01-2 2H8a2 2 0 01-2-2V7a2 2 0 012-2z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11l4-4M15 11l-4-4M15 11v4M11 7h4"></path>
+                        </svg>
+                        複製文章
+                    </button>
                 </div>
             </div>
         </main>
@@ -224,11 +198,223 @@
         <span id="toastMessage"></span>
     </div>
 
-    <script src="config.local.js"></script>
-    <script src="config.js"></script>
-    <script src="creator.js"></script>
-    <script src="draggable.js"></script>
-    <script src="app.js"></script>
+    <script>
+        // --- Configuration & Utility Functions ---
+        const MODEL_NAME = "gemini-2.5-flash-preview-09-2025";
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent`;
+        const API_KEY = ""; // Placeholder for Canvas environment
+
+        /**
+         * 顯示 Toast 訊息
+         * @param {string} message 要顯示的訊息
+         * @param {number} duration 顯示時間 (毫秒)
+         */
+        function showToast(message, duration = 3000) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            toastMessage.textContent = message;
+            toast.classList.remove('hidden');
+            // Force reflow for transition
+            void toast.offsetWidth; 
+            toast.classList.add('visible');
+
+            setTimeout(() => {
+                toast.classList.remove('visible');
+                // Hide after transition
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 300);
+            }, duration);
+        }
+
+        /**
+         * 實現帶有指數退避機制的 API 呼叫
+         * @param {object} payload API 請求的內容
+         * @param {number} maxRetries 最大重試次數
+         * @param {number} delay 初始延遲 (毫秒)
+         */
+        async function fetchWithExponentialBackoff(payload, maxRetries = 5, delay = 1000) {
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch(`${API_URL}?key=${API_KEY}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.ok) {
+                        return await response.json();
+                    }
+
+                    // For retryable errors (e.g., 429 Too Many Requests, 5xx server errors)
+                    if (response.status === 429 || response.status >= 500) {
+                        if (i === maxRetries - 1) {
+                            throw new Error(`API 請求失敗: ${response.status} ${response.statusText}`);
+                        }
+                        // Retry with backoff
+                        const backoffTime = delay * Math.pow(2, i) + Math.random() * 1000;
+                        await new Promise(resolve => setTimeout(resolve, backoffTime));
+                        continue;
+                    }
+
+                    // For non-retryable errors (e.g., 400 Bad Request, 401 Unauthorized)
+                    const errorJson = await response.json();
+                    throw new Error(`API 錯誤: ${response.status} ${response.statusText}. 詳細訊息: ${errorJson.error.message}`);
+
+                } catch (error) {
+                    if (i === maxRetries - 1) {
+                        throw error;
+                    }
+                    // Continue to next retry
+                }
+            }
+        }
+
+
+        // --- Main Logic ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const articleFields = [
+                { id: 'article1', counterId: 'counter1' },
+                { id: 'article2', counterId: 'counter2' },
+                { id: 'article3', counterId: 'counter3' }
+            ];
+            const mergeBtn = document.getElementById('mergeBtn');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const articlesList = document.getElementById('articlesList');
+            const initialMessage = document.getElementById('initialMessage');
+            const copyBtn = document.getElementById('copyBtn');
+
+            // --- UI Controls ---
+
+            /** 更新字數計數器並檢查按鈕啟用狀態 */
+            function updateCounterAndButton() {
+                let allValid = true;
+                let totalChars = 0;
+                
+                articleFields.forEach(field => {
+                    const textarea = document.getElementById(field.id);
+                    const counter = document.getElementById(field.counterId);
+                    const count = textarea.value.trim().length;
+                    
+                    counter.textContent = `${count} 字`;
+                    totalChars += count;
+                    
+                    // 必填欄位檢查
+                    if ((field.id === 'article1' || field.id === 'article2') && count === 0) {
+                        allValid = false;
+                    }
+                });
+                
+                // 必須至少有 50 字總數，並且必填欄位都有內容
+                mergeBtn.disabled = !allValid || totalChars < 50;
+            }
+
+            /** 清除按鈕處理函數 */
+            document.querySelectorAll('.clear-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const fieldNum = e.currentTarget.getAttribute('data-field');
+                    const textarea = document.getElementById(`article${fieldNum}`);
+                    textarea.value = '';
+                    updateCounterAndButton();
+                    showToast(`文章片段 ${fieldNum} 已清除。`, 1500);
+                });
+            });
+
+            /** 輸入框事件監聽 */
+            articleFields.forEach(field => {
+                document.getElementById(field.id).addEventListener('input', updateCounterAndButton);
+            });
+            
+            // 初始化計數器和按鈕狀態
+            updateCounterAndButton();
+
+            // --- Copy Button Logic ---
+            copyBtn.addEventListener('click', () => {
+                const mergedText = articlesList.textContent.trim();
+                // 使用 document.execCommand('copy') 作為 iframe 環境中的可靠複製方法
+                const tempTextArea = document.createElement('textarea');
+                tempTextArea.value = mergedText;
+                document.body.appendChild(tempTextArea);
+                tempTextArea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast('文章已成功複製到剪貼簿！', 2000);
+                } catch (err) {
+                    showToast('複製失敗，請手動複製。', 3000);
+                }
+                document.body.removeChild(tempTextArea);
+            });
+
+
+            // --- Merge Article Logic ---
+
+            mergeBtn.addEventListener('click', async () => {
+                const article1 = document.getElementById('article1').value.trim();
+                const article2 = document.getElementById('article2').value.trim();
+                const article3 = document.getElementById('article3').value.trim();
+                
+                if (!article1 || !article2) {
+                    showToast('請至少輸入第一和第二篇文章片段。');
+                    return;
+                }
+
+                // 準備提示詞 (Prompt)
+                let fullPrompt = "你是一位專業的中文文章創作者。你的任務是將使用者提供的文章片段智能地合併成一篇邏輯連貫、語氣一致且內容豐富的長篇文章。你必須在片段之間添加過渡性的、擴展性的內容，確保文章的流暢度與深度。請使用繁體中文進行創作。\n\n";
+                fullPrompt += "請將以下文章片段合併為一篇完整的長文。請保持文章的連貫性並擴展內容，使其成為一篇邏輯完整的作品。請確保合併後的文章只有文字內容，不要包含任何標題或格式說明，且使用繁體中文（zh-TW）。\n\n文章片段：\n";
+
+                fullPrompt += `1. 開頭片段 (必填):\n---\n${article1}\n---\n`;
+                fullPrompt += `2. 中間片段 (必填):\n---\n${article2}\n---\n`;
+                
+                if (article3) {
+                    fullPrompt += `3. 結尾片段 (選填):\n---\n${article3}\n---\n`;
+                }
+
+                // API Payload
+                const payload = {
+                    contents: [{ parts: [{ text: fullPrompt }] }],
+                    systemInstruction: {
+                        parts: [{ text: "Act as a professional Traditional Chinese writer. Your goal is to merge 2-3 provided article fragments into a single, cohesive, long-form article. You must write expansive, smooth transition content between the fragments. The final output must be only the merged article text, without any preambles, titles, or formatting instructions, and be in Traditional Chinese." }]
+                    },
+                    // 不使用 Google Search，因為這是內容創作任務
+                };
+
+                // 顯示載入狀態
+                mergeBtn.disabled = true;
+                loadingIndicator.classList.remove('hidden');
+                articlesList.innerHTML = '';
+                initialMessage.classList.add('hidden');
+                copyBtn.classList.add('hidden');
+
+                try {
+                    const result = await fetchWithExponentialBackoff(payload);
+                    const mergedText = result?.candidates?.[0]?.content?.parts?.[0]?.text || "AI 合併失敗，請重試或檢查輸入內容。";
+                    
+                    // 將結果顯示在文章列表中
+                    articlesList.innerHTML = `<div class="prose max-w-none text-gray-800 whitespace-pre-wrap">${mergedText}</div>`;
+                    
+                    if (mergedText.startsWith("AI 合併失敗")) {
+                        showToast("合併文章時發生錯誤。", 4000);
+                        copyBtn.classList.add('hidden');
+                        initialMessage.classList.remove('hidden');
+                    } else {
+                        copyBtn.classList.remove('hidden');
+                        showToast("文章合併成功！", 3000);
+                    }
+                    
+                } catch (error) {
+                    console.error('API Error:', error);
+                    articlesList.innerHTML = `<p class="text-red-500 p-4">❌ 文章合併失敗。錯誤訊息: ${error.message}</p>`;
+                    copyBtn.classList.add('hidden');
+                    initialMessage.classList.remove('hidden');
+                    showToast("文章合併過程中發生連線或服務錯誤。", 5000);
+                } finally {
+                    loadingIndicator.classList.add('hidden');
+                    updateCounterAndButton(); // 重新檢查並啟用按鈕
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>
